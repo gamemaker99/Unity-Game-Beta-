@@ -1,0 +1,72 @@
+using UnityEngine;
+using System.Collections;
+
+public class PandMInteraction : MonoBehaviour {
+
+	public GameObject monster = null;
+	private string monsterName = null;
+	private Transform target = null;
+	private int moveSpeed = 8;
+	private int rotationSpeed = 5;
+	private Transform myTransform = null;
+	private int playerHealth = 100;
+	private int spiderAttack = 25;
+	private int spiderHealth = 100;
+	private int bulletDamage = 25;
+	private bool gameOver = false;
+
+	// Use this for initialization
+	void Start () {
+
+		monster = gameObject;
+		monsterName = "Death Spider";
+		Debug.Log("The monster's name is "+monsterName);
+		target = GameObject.FindWithTag("Player").transform;
+		myTransform = transform;
+		monster.SetActive (false);
+	}
+
+	//When the monster collides with the player minus the attack amount from the players health and play animation "Attack".
+	void OnTriggerEnter(Collider other){
+		if(other.gameObject.tag == "Player"){
+			playerHealth = playerHealth - spiderAttack;
+			GetComponent<Animation>().CrossFade("Attack");
+			GetComponent<Animation>().wrapMode = WrapMode.Once;
+		}
+		if(other.gameObject.tag == "Bullet"){
+			spiderHealth = spiderHealth - bulletDamage;
+			GetComponent<Animation>().CrossFade("Death");
+			GetComponent<Animation>().wrapMode = WrapMode.Once;
+
+		}
+	}
+	//When the monster stops colliding with the player, play animation "Walk".
+	void OnTriggerExit(Collider other){
+		if(other.gameObject.tag == "Player"){
+			GetComponent<Animation>().CrossFade("Walk");
+			GetComponent<Animation>().wrapMode = WrapMode.Loop;
+		}
+		if(other.gameObject.tag == "Bullet"){
+			GetComponent<Animation>().CrossFade ("Walk");
+			GetComponent<Animation>().wrapMode = WrapMode.Loop;
+		}
+	}
+
+	// Update is called once per frame
+	void Update () {
+		//Look at this link for full explanation of this small paragraph of code --> http://docs.unity3d.com/ScriptReference/Quaternion.Slerp.html
+		myTransform.rotation = Quaternion.Slerp(myTransform.rotation,
+		Quaternion.LookRotation(target.position - myTransform.position), rotationSpeed*Time.deltaTime); 
+		myTransform.position += myTransform.forward * moveSpeed * Time.deltaTime;
+		if(playerHealth <= 0){
+			gameOver = true;
+			Application.LoadLevel("Game Over Camp");
+		}
+		if(spiderHealth <= 0){
+			GetComponent<Animation>().CrossFade ("Death");
+			GetComponent<Animation>().wrapMode = WrapMode.Once;
+			monster.SetActive (false);
+		}
+	}
+	
+}
