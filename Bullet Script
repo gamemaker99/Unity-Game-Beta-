@@ -1,0 +1,62 @@
+using UnityEngine;
+using System.Collections;
+
+public class Bullet : MonoBehaviour
+{
+	public class Inventory
+	{
+		public int bullets;
+		
+		public Inventory(int bul)
+		{
+			bullets = bul;
+		}
+	}
+	
+	
+	public Inventory myInventory= new Inventory(10);
+	public float speed;
+	public float turnSpeed;
+	public GameObject bullet;
+	public Rigidbody bulletPrefab;
+	public Transform firePosition;
+	public float bulletSpeed;
+	
+	
+	void Update ()
+	{
+		Movement();
+		Shoot();
+	}
+	
+	void Start (){
+		bullet.SetActive (true);
+	}
+
+	void Movement ()
+	{
+		float forwardMovement = Input.GetAxis("Vertical") * speed * Time.deltaTime;
+		float turnMovement = Input.GetAxis("Horizontal") * turnSpeed * Time.deltaTime;
+		
+		transform.Translate(Vector3.forward * forwardMovement);
+		transform.Rotate(Vector3.up * turnMovement);
+	}
+	
+	
+	void Shoot ()
+	{
+		if(Input.GetButtonDown("Fire1") && myInventory.bullets > 0)
+		{
+			Rigidbody bulletInstance = Instantiate(bulletPrefab, firePosition.position, firePosition.rotation) as Rigidbody;
+			bulletInstance.AddForce(firePosition.forward * bulletSpeed);
+			myInventory.bullets--;
+		}
+	}
+
+	void OnTriggerEnter(Collider other){
+		if(other.gameObject.tag == "Monster"){
+			bullet.SetActive (false);
+		}
+	}
+	
+}
